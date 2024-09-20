@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-express
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb-express
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/name: mongodb-express
+    spec:
+      containers:
+        - name: mongo-express
+          image: mongo-express
+          command:
+            - /sbin/tini
+          args:
+            - '--'
+            - yarn
+            - start
+            - '--url'
+            - $(MONGODB_SERVER)&authMechanism=SCRAM-SHA-256
+          ports:
+            - name: http
+              containerPort: 8081
+              protocol: TCP
+          env:
+            - name: ME_CONFIG_MONGODB_ENABLE_ADMIN
+              value: 'true'
+            - name: ME_CONFIG_MONGODB_TLS_ALLOW_CERTS
+              value: 'true'
+            - name: ME_CONFIG_BASICAUTH_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-admin-admin-user
+                  key: username
+            - name: ME_CONFIG_BASICAUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-admin-admin-user
+                  key: password
+            - name: MONGODB_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-admin-admin-user
+                  key: connectionString.standard
+          resources:
+            limits:
+              cpu: 300m
+              memory: 300Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+          securityContext:
+            runAsUser: 1001
+            runAsNonRoot: true
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
