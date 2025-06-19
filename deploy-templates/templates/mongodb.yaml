@@ -3,6 +3,13 @@ kind: MongoDBCommunity
 metadata:
   name: mongodb
 spec:
+  statefulSet:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: mongod
+              image: {{ .Values.image.registry | default "docker.io" }}/mongodb/mongodb-community-server:6.0.5-ubi8
   members: 1
   type: ReplicaSet
   version: "6.0.5"

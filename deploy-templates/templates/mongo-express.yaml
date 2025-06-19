@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: mongo-express
-          image: mongo-express
+          image: {{ .Values.image.registry | default "docker.io" }}/mongo-express
           command:
             - /sbin/tini
           args:

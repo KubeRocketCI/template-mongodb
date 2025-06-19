@@ -4,6 +4,8 @@
 
 replicaCount: 1
 
+image:
+  registry: ""
 ingress:
   enabled: false
   dnsWildcard: mongodb.example.com
