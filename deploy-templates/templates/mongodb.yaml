@@ -6,6 +6,12 @@ spec:
   members: 1
   type: ReplicaSet
   version: "6.0.5"
+  statefulSet:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/instance: {{ .Release.Name | quote}}
 
   security:
     authentication:
